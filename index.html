@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Epax Solar — Widget Demo</title>
+<style>
+  body { margin: 0; font-family: system-ui, sans-serif; background: #f0f4f8; }
+  .demo-header {
+    background: #1a3a5c; color: white; padding: 60px 40px; text-align: center;
+  }
+  .demo-header h1 { font-size: 32px; margin-bottom: 8px; }
+  .demo-header p { opacity: .75; font-size: 16px; }
+  .demo-body { max-width: 800px; margin: 40px auto; padding: 0 24px; }
+  .demo-card {
+    background: white; border-radius: 12px; padding: 28px; margin-bottom: 20px;
+    border: 1px solid #e2e6ea;
+  }
+  .demo-card h2 { font-size: 18px; color: #1a3a5c; margin-bottom: 8px; }
+  .demo-card p { color: #6b7280; line-height: 1.6; margin-bottom: 12px; }
+  code {
+    display: block; background: #1a1a2e; color: #a8d8a8; padding: 16px;
+    border-radius: 8px; font-size: 13px; line-height: 1.6; overflow-x: auto;
+  }
+</style>
+</head>
+<body>
+<div class="demo-header">
+  <h1>☀ Epax Solar</h1>
+  <p>PV-Großhandel · Deggendorf · Demo-Seite für den Chat-Bot</p>
+</div>
+<div class="demo-body">
+  <div class="demo-card">
+    <h2>Widget aktiv ↘</h2>
+    <p>Der Chat-Button ist unten rechts sichtbar. Klicken Sie darauf, um den Assistenten zu testen. Alle Leads, die Sie über das Kontaktformular absenden, erscheinen im Admin-Dashboard unter <strong>/admin</strong>.</p>
+  </div>
+  <div class="demo-card">
+    <h2>Einbinden auf Ihrer Website</h2>
+    <p>Fügen Sie diesen Snippet einmalig vor dem schließenden &lt;/body&gt;-Tag auf jeder Seite ein:</p>
+    <code id="snippet-code"></code>
+    <p style="margin-top:12px;font-size:13px;color:#6b7280">Ersetzen Sie <em>https://ihr-server.de</em> mit der URL, auf der dieser Server läuft.</p>
+  </div>
+  <div class="demo-card">
+    <h2>Admin-Zugang</h2>
+    <p>Das Admin-Dashboard erreichen Sie unter <a href="/admin" style="color:#1a3a5c">/admin</a>. Standard-Passwort: <strong>epax2024</strong> (bitte in der .env-Datei ändern).</p>
+  </div>
+</div>
+<script>
+  // Show the embed snippet with the current host URL
+  const host = window.location.origin;
+  document.getElementById('snippet-code').textContent =
+    `<!-- Epax Solar Chat Bot -->\n<script>\n  window.EPAX_BOT_URL = '${host}';\n<\/script>\n<script src="${host}/widget.js" defer><\/script>`;
+</script>
+<!-- Widget eingebunden -->
+<script>
+  window.EPAX_BOT_URL = window.location.origin;
+</script>
+<script src="/widget.js" defer></script>
+</body>
+</html>

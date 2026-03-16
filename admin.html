@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Epax Solar · Admin</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --brand: #1a3a5c; --accent: #f5a623; --bg: #f5f6f8; --surface: #fff;
+    --border: #e2e6ea; --text: #1a1a2e; --muted: #6b7280;
+    --hot: #fee2e2; --hot-t: #991f1f; --warm: #fef3c7; --warm-t: #854f0b;
+    --cold: #e0f2fe; --cold-t: #0c447c;
+    --green-bg: #dcfce7; --green-t: #166534;
+  }
+  body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
+
+  /* Login */
+  #login-screen {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #0f2240 0%, #1a3a5c 100%);
+  }
+  .login-card {
+    background: white; border-radius: 16px; padding: 40px 36px; width: 340px;
+    text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  }
+  .login-logo { font-size: 36px; margin-bottom: 8px; }
+  .login-card h2 { font-size: 20px; color: var(--brand); margin-bottom: 4px; }
+  .login-card p { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+  .login-input {
+    width: 100%; padding: 11px 14px; border: 1px solid var(--border);
+    border-radius: 10px; font-size: 14px; margin-bottom: 12px; outline: none;
+    font-family: inherit; color: var(--text);
+  }
+  .login-input:focus { border-color: var(--brand); }
+  .login-btn {
+    width: 100%; padding: 12px; background: var(--brand); color: white; border: none;
+    border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer;
+    font-family: inherit; transition: opacity .15s;
+  }
+  .login-btn:hover { opacity: .88; }
+  .login-error { color: #dc2626; font-size: 12px; margin-top: 8px; display: none; }
+
+  /* App shell */
+  #app { display: none; min-height: 100vh; }
+  .topbar {
+    background: var(--brand); padding: 0 24px; height: 56px;
+    display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 100;
+  }
+  .topbar-logo { font-size: 20px; }
+  .topbar h1 { font-size: 16px; font-weight: 600; color: white; }
+  .topbar-badge {
+    font-size: 11px; background: var(--accent); color: white;
+    padding: 3px 8px; border-radius: 20px; font-weight: 700;
+  }
+  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+  .export-btn {
+    padding: 7px 14px; background: rgba(255,255,255,0.12); color: white; border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 8px; font-size: 13px; cursor: pointer; font-family: inherit; transition: background .15s;
+  }
+  .export-btn:hover { background: rgba(255,255,255,0.2); }
+  .logout-btn {
+    padding: 7px 14px; background: none; color: rgba(255,255,255,0.7); border: none;
+    font-size: 13px; cursor: pointer; font-family: inherit;
+  }
+  .logout-btn:hover { color: white; }
+
+  /* Stats row */
+  .stats-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+    padding: 20px 24px 0;
+  }
+  @media (max-width: 700px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+  .stat-card {
+    background: var(--surface); border-radius: 12px; padding: 16px 20px;
+    border: 1px solid var(--border);
+  }
+  .stat-num { font-size: 28px; font-weight: 700; color: var(--brand); line-height: 1; }
+  .stat-label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .stat-card.hot .stat-num { color: var(--hot-t); }
+  .stat-card.converted .stat-num { color: #166534; }
+
+  /* Filters */
+  .filters-bar {
+    display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+    padding: 16px 24px;
+  }
+  .filter-input {
+    flex: 1; min-width: 200px; padding: 9px 12px; border: 1px solid var(--border);
+    border-radius: 8px; font-size: 13px; font-family: inherit; color: var(--text);
+    background: var(--surface); outline: none;
+  }
+  .filter-input:focus { border-color: var(--brand); }
+  .filter-select {
+    padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px;
+    font-size: 13px; font-family: inherit; background: var(--surface);
+    color: var(--text); outline: none; cursor: pointer;
+  }
+  .filter-select:focus { border-color: var(--brand); }
+  .filter-count { font-size: 12px; color: var(--muted); margin-left: auto; }
+
+  /* Table */
+  .table-wrap {
+    margin: 0 24px 24px; background: var(--surface); border-radius: 12px;
+    border: 1px solid var(--border); overflow: hidden;
+  }
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    padding: 11px 14px; text-align: left; font-size: 11px; font-weight: 600;
+    color: var(--muted); text-transform: uppercase; letter-spacing: .05em;
+    background: #fafafa; border-bottom: 1px solid var(--border);
+  }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #fafcff; }
+  td { padding: 12px 14px; font-size: 13px; vertical-align: middle; }
+  .td-name { font-weight: 600; }
+  .td-company { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .td-email { color: var(--muted); }
+  .badge {
+    display: inline-block; padding: 3px 9px; border-radius: 20px;
+    font-size: 11px; font-weight: 600;
+  }
+  .badge-hot { background: var(--hot); color: var(--hot-t); }
+  .badge-warm { background: var(--warm); color: var(--warm-t); }
+  .badge-cold { background: var(--cold); color: var(--cold-t); }
+  .badge-new { background: #ede9fe; color: #4c1d95; }
+  .badge-contacted { background: #fef3c7; color: #92400e; }
+  .badge-converted { background: var(--green-bg); color: var(--green-t); }
+  .status-select {
+    padding: 4px 8px; border: 1px solid var(--border); border-radius: 6px;
+    font-size: 12px; background: white; font-family: inherit; cursor: pointer;
+  }
+  .action-btn {
+    padding: 4px 10px; border: 1px solid var(--border); border-radius: 6px;
+    font-size: 11px; background: white; cursor: pointer; font-family: inherit;
+    color: var(--muted); transition: all .15s;
+  }
+  .action-btn:hover { background: #fee2e2; color: #991f1f; border-color: #fca5a5; }
+  .empty-state {
+    text-align: center; padding: 48px 24px; color: var(--muted); font-size: 14px;
+  }
+  .empty-state .empty-icon { font-size: 32px; margin-bottom: 12px; }
+
+  /* Detail drawer */
+  #drawer-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 200;
+    display: none;
+  }
+  #drawer {
+    position: fixed; right: 0; top: 0; bottom: 0; width: 360px;
+    background: white; z-index: 201; padding: 24px; overflow-y: auto;
+    transform: translateX(100%); transition: transform .25s;
+    box-shadow: -4px 0 24px rgba(0,0,0,0.12);
+  }
+  #drawer.open { transform: translateX(0); }
+  .drawer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .drawer-title { font-size: 16px; font-weight: 700; }
+  .drawer-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--muted); }
+  .drawer-field { margin-bottom: 14px; }
+  .drawer-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 4px; }
+  .drawer-value { font-size: 14px; color: var(--text); }
+  .drawer-divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+</style>
+</head>
+<body>
+
+<!-- Login screen -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">☀</div>
+    <h2>Epax Solar</h2>
+    <p>Admin Dashboard — nur für Mitarbeiter</p>
+    <input class="login-input" id="pw-input" type="password" placeholder="Passwort eingeben"
+      onkeydown="if(event.key==='Enter')doLogin()"/>
+    <button class="login-btn" onclick="doLogin()">Anmelden</button>
+    <div class="login-error" id="login-error">Falsches Passwort. Bitte erneut versuchen.</div>
+  </div>
+</div>
+
+<!-- App -->
+<div id="app">
+  <div class="topbar">
+    <span class="topbar-logo">☀</span>
+    <h1>Epax Solar · Leads</h1>
+    <span class="topbar-badge" id="badge-new">0 neu</span>
+    <div class="topbar-right">
+      <button class="export-btn" onclick="exportCSV()">↓ CSV Export</button>
+      <button class="logout-btn" onclick="doLogout()">Abmelden</button>
+    </div>
+  </div>
+
+  <div class="stats-grid" id="stats-grid">
+    <div class="stat-card"><div class="stat-num" id="s-total">—</div><div class="stat-label">Gesamt Leads</div></div>
+    <div class="stat-card hot"><div class="stat-num" id="s-hot">—</div><div class="stat-label">Hot Leads</div></div>
+    <div class="stat-card"><div class="stat-num" id="s-week">—</div><div class="stat-label">Diese Woche</div></div>
+    <div class="stat-card converted"><div class="stat-num" id="s-conv">—</div><div class="stat-label">Konvertiert</div></div>
+  </div>
+
+  <div class="filters-bar">
+    <input class="filter-input" id="search-input" placeholder="Suche nach Name, E-Mail, Firma..."
+      oninput="applyFilters()"/>
+    <select class="filter-select" id="filter-score" onchange="applyFilters()">
+      <option value="">Alle Scores</option>
+      <option value="hot">🔴 Hot</option>
+      <option value="warm">🟡 Warm</option>
+      <option value="cold">🔵 Cold</option>
+    </select>
+    <select class="filter-select" id="filter-status" onchange="applyFilters()">
+      <option value="">Alle Status</option>
+      <option value="new">Neu</option>
+      <option value="contacted">Kontaktiert</option>
+      <option value="converted">Konvertiert</option>
+    </select>
+    <span class="filter-count" id="filter-count"></span>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Kontakt</th>
+          <th>Interesse</th>
+          <th>Score</th>
+          <th>Status</th>
+          <th>Datum</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="leads-body"></tbody>
+    </table>
+    <div class="empty-state" id="empty-state" style="display:none">
+      <div class="empty-icon">📭</div>
+      Noch keine Leads vorhanden. Sobald Webseitenbesucher das Kontaktformular ausfüllen, erscheinen sie hier.
+    </div>
+  </div>
+</div>
+
+<!-- Detail drawer -->
+<div id="drawer-overlay" onclick="closeDrawer()"></div>
+<div id="drawer">
+  <div class="drawer-header">
+    <span class="drawer-title" id="drawer-name">Lead Detail</span>
+    <button class="drawer-close" onclick="closeDrawer()">✕</button>
+  </div>
+  <div id="drawer-content"></div>
+</div>
+
+<script>
+let TOKEN = sessionStorage.getItem('epax_token') || '';
+let allLeads = [];
+let filteredLeads = [];
+
+// Auto-login if token in session
+if (TOKEN) initApp();
+
+async function doLogin() {
+  const pw = document.getElementById('pw-input').value;
+  try {
+    const res = await fetch('/api/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw })
+    });
+    if (!res.ok) throw new Error('wrong');
+    const data = await res.json();
+    TOKEN = data.token;
+    sessionStorage.setItem('epax_token', TOKEN);
+    initApp();
+  } catch {
+    document.getElementById('login-error').style.display = 'block';
+    document.getElementById('pw-input').value = '';
+  }
+}
+
+async function doLogout() {
+  await fetch('/api/admin/logout', { method: 'POST', headers: { 'x-admin-token': TOKEN } }).catch(()=>{});
+  sessionStorage.removeItem('epax_token');
+  TOKEN = '';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+}
+
+function initApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  loadStats();
+  loadLeads();
+  setInterval(loadLeads, 30000);
+}
+
+async function loadStats() {
+  try {
+    const res = await fetch('/api/admin/stats', { headers: { 'x-admin-token': TOKEN } });
+    if (res.status === 401) { doLogout(); return; }
+    const d = await res.json();
+    document.getElementById('s-total').textContent = d.total;
+    document.getElementById('s-hot').textContent = d.hot;
+    document.getElementById('s-week').textContent = d.thisWeek;
+    document.getElementById('s-conv').textContent = d.converted;
+    document.getElementById('badge-new').textContent = d.new + ' neu';
+  } catch(e) { console.error(e); }
+}
+
+async function loadLeads() {
+  try {
+    const res = await fetch('/api/admin/leads', { headers: { 'x-admin-token': TOKEN } });
+    if (res.status === 401) { doLogout(); return; }
+    const data = await res.json();
+    allLeads = data.leads;
+    applyFilters();
+  } catch(e) { console.error(e); }
+}
+
+function applyFilters() {
+  const search = document.getElementById('search-input').value.toLowerCase();
+  const score = document.getElementById('filter-score').value;
+  const status = document.getElementById('filter-status').value;
+  filteredLeads = allLeads.filter(l => {
+    if (score && l.score !== score) return false;
+    if (status && l.status !== status) return false;
+    if (search && !l.name.toLowerCase().includes(search) &&
+        !l.email.toLowerCase().includes(search) &&
+        !(l.company||'').toLowerCase().includes(search)) return false;
+    return true;
+  });
+  document.getElementById('filter-count').textContent = filteredLeads.length + ' von ' + allLeads.length + ' Leads';
+  renderLeads();
+}
+
+function renderLeads() {
+  const tbody = document.getElementById('leads-body');
+  const empty = document.getElementById('empty-state');
+  if (!filteredLeads.length) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  tbody.innerHTML = filteredLeads.map(l => `
+    <tr>
+      <td>
+        <div class="td-name">${esc(l.name)}</div>
+        <div class="td-email">${esc(l.email)}</div>
+        ${l.company ? `<div class="td-company">${esc(l.company)}</div>` : ''}
+      </td>
+      <td>${esc(l.interest || '—')}</td>
+      <td><span class="badge badge-${l.score}">${l.score}</span></td>
+      <td>
+        <select class="status-select" onchange="updateStatus('${l.id}', this.value)">
+          <option value="new" ${l.status==='new'?'selected':''}>Neu</option>
+          <option value="contacted" ${l.status==='contacted'?'selected':''}>Kontaktiert</option>
+          <option value="converted" ${l.status==='converted'?'selected':''}>Konvertiert</option>
+        </select>
+      </td>
+      <td>${new Date(l.createdAt).toLocaleDateString('de-DE')}</td>
+      <td style="display:flex;gap:6px">
+        <button class="action-btn" onclick="openDrawer('${l.id}')">Detail</button>
+        <button class="action-btn" onclick="deleteLead('${l.id}')">Löschen</button>
+      </td>
+    </tr>`).join('');
+}
+
+async function updateStatus(id, status) {
+  await fetch('/api/admin/leads/' + id, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', 'x-admin-token': TOKEN },
+    body: JSON.stringify({ status })
+  });
+  const lead = allLeads.find(l => l.id === id);
+  if (lead) lead.status = status;
+  loadStats();
+}
+
+async function deleteLead(id) {
+  if (!confirm('Lead wirklich löschen?')) return;
+  await fetch('/api/admin/leads/' + id, { method: 'DELETE', headers: { 'x-admin-token': TOKEN } });
+  allLeads = allLeads.filter(l => l.id !== id);
+  applyFilters();
+  loadStats();
+}
+
+function openDrawer(id) {
+  const lead = allLeads.find(l => l.id === id);
+  if (!lead) return;
+  document.getElementById('drawer-name').textContent = lead.name;
+  document.getElementById('drawer-content').innerHTML = `
+    <div class="drawer-field"><div class="drawer-label">E-Mail</div><div class="drawer-value"><a href="mailto:${esc(lead.email)}" style="color:#1a3a5c">${esc(lead.email)}</a></div></div>
+    ${lead.company ? `<div class="drawer-field"><div class="drawer-label">Firma</div><div class="drawer-value">${esc(lead.company)}</div></div>` : ''}
+    ${lead.phone ? `<div class="drawer-field"><div class="drawer-label">Telefon</div><div class="drawer-value"><a href="tel:${esc(lead.phone)}" style="color:#1a3a5c">${esc(lead.phone)}</a></div></div>` : ''}
+    <div class="drawer-field"><div class="drawer-label">Interesse</div><div class="drawer-value">${esc(lead.interest || '—')}</div></div>
+    ${lead.message ? `<div class="drawer-field"><div class="drawer-label">Nachricht</div><div class="drawer-value" style="background:#f5f6f8;padding:10px;border-radius:8px;font-size:13px">${esc(lead.message)}</div></div>` : ''}
+    <hr class="drawer-divider"/>
+    <div class="drawer-field"><div class="drawer-label">Score</div><div class="drawer-value"><span class="badge badge-${lead.score}">${lead.score}</span></div></div>
+    <div class="drawer-field"><div class="drawer-label">Status</div><div class="drawer-value">
+      <select class="status-select" onchange="updateStatus('${lead.id}', this.value)" style="width:100%">
+        <option value="new" ${lead.status==='new'?'selected':''}>Neu</option>
+        <option value="contacted" ${lead.status==='contacted'?'selected':''}>Kontaktiert</option>
+        <option value="converted" ${lead.status==='converted'?'selected':''}>Konvertiert</option>
+      </select>
+    </div></div>
+    <div class="drawer-field"><div class="drawer-label">Datum</div><div class="drawer-value">${new Date(lead.createdAt).toLocaleString('de-DE')}</div></div>
+    <hr class="drawer-divider"/>
+    <a href="mailto:${esc(lead.email)}?subject=Epax Solar - Ihre Anfrage" style="display:block;text-align:center;padding:10px;background:#1a3a5c;color:white;border-radius:8px;text-decoration:none;font-size:14px;font-weight:600">
+      ✉ E-Mail senden
+    </a>`;
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('drawer-overlay').style.display = 'block';
+}
+
+function closeDrawer() {
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('drawer-overlay').style.display = 'none';
+}
+
+function exportCSV() {
+  window.open('/api/admin/export?t=' + TOKEN, '_blank');
+  fetch('/api/admin/export', { headers: { 'x-admin-token': TOKEN } })
+    .then(r => r.blob()).then(blob => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'epax-leads.csv';
+      a.click();
+    }).catch(() => alert('Export fehlgeschlagen.'));
+}
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
