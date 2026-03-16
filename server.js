@@ -89,14 +89,26 @@ Respond in the SAME language the user writes in (German or English).`,
 
 function fallbackResponse(msg) {
   const q = msg.toLowerCase();
-  if (q.match(/modul|panel|trina|ja solar|aiko/)) return 'Wir führen Module von Trina Solar, JA Solar und Aiko. Für welches Projekt suchen Sie Module – Wohngebäude oder Gewerbe?';
-  if (q.match(/inverter|wechselrichter|sma|fronius|kostal|sungrow|huawei|goodwe|rct/)) return 'Unser Wechselrichter-Sortiment umfasst SMA, Fronius, Kostal, Sungrow, RCT-Power, GoodWe und Huawei. Welche Leistungsklasse benötigen Sie?';
-  if (q.match(/speicher|storage|byd|batterie|battery|fenecon/)) return 'Batteriespeicher führen wir von BYD, Sungrow, RCT-Power, SMA, Huawei, Fenecon, Fronius und GoodWe. Soll ich bei der Dimensionierung helfen?';
-  if (q.match(/e.?mobil|ev|wallbox|lad/)) return 'Für E-Mobilität bieten wir Wallboxen von Fronius, Huawei, Kostal, SMA und Sungrow an. Kombinieren Sie das mit einer PV-Anlage?';
-  if (q.match(/preis|price|kosten|cost|quote|angebot/)) return 'Für ein individuelles Angebot hinterlassen Sie gerne Ihre Kontaktdaten – unser Vertriebsteam meldet sich umgehend!';
-  if (q.match(/bestell|order|kauf|buy/)) return 'Bestellungen über epax-solar.de oder Tel. +49 991 99899011. Kann ich bei der Produktauswahl helfen?';
-  if (q.match(/hallo|hi|hello|guten|hey|servus/)) return 'Hallo! Willkommen bei Epax Solar – Ihrem PV-Großhändler in Deggendorf. Wie kann ich Ihnen heute helfen?';
-  return 'Gute Frage! Unser Vertriebsteam kann das am besten beantworten. Möchten Sie Ihre Kontaktdaten hinterlassen?';
+  // Greetings — check first
+  if (q.match(/^(hallo|hi|hello|hey|servus|guten\s)/)) return 'Hallo! Willkommen bei Epax Solar – Ihrem PV-Großhändler in Deggendorf. Wie kann ich Ihnen heute helfen?';
+  // General product overview
+  if (q.match(/was (verkauft|bietet|führt|haben sie)|was gibt|produkt|sortiment|übersicht|what do you|what (do you )?sell|what.s available/)) return 'Epax Solar ist ein B2B PV-Großhändler. Wir führen:\n\n• Solarmodule (Trina Solar, JA Solar, Aiko)\n• Wechselrichter (SMA, Fronius, Kostal, Sungrow, Huawei, GoodWe, RCT-Power)\n• Batteriespeicher (BYD, Sungrow, SMA, Huawei, Fenecon, Fronius, GoodWe)\n• Unterkonstruktion & Montagematerial\n• PV-Zubehör (Kabel, Stecker, Optimierer)\n• E-Mobilität / Wallboxen\n\nWelcher Bereich interessiert Sie?';
+  // Specific product categories
+  if (q.match(/modul|panel|trina|ja solar|aiko/)) return 'Unsere Solarmodule kommen von Trina Solar, JA Solar und Aiko – von effizienten Wohnmodulen bis zu leistungsstarken Gewerbelösungen. Für welches Projekt suchen Sie Module?';
+  if (q.match(/wechselrichter|inverter|sma|fronius|kostal|sungrow|huawei|goodwe|rct/)) return 'Unser Wechselrichter-Sortiment umfasst SMA, Fronius, Kostal, Sungrow, RCT-Power, GoodWe und Huawei – für Wohn- und Gewerbeanlagen jeder Größe. Welche Leistungsklasse benötigen Sie?';
+  if (q.match(/speicher|batterie|battery|storage|byd|fenecon/)) return 'Batteriespeicher führen wir von BYD (HVB, HVM, HVS), Sungrow (SBH, SBR), RCT-Power, SMA, Huawei, Fenecon, Fronius und GoodWe. Soll ich bei der Dimensionierung helfen?';
+  if (q.match(/e.?mobil|wallbox|ladestation|ev charg|laden/)) return 'Für Elektromobilität bieten wir Wallboxen und Ladelösungen von Fronius, Huawei, Kostal, SMA und Sungrow an. Planen Sie eine kombinierte Solar- und Ladeanlage?';
+  if (q.match(/unterkonstruktion|montage|befestig|schiene|flachdach|dach/)) return 'Unser Unterkonstruktionssortiment umfasst Dachbefestigungen, Flachdachsysteme, Fassadensysteme, Montageschienen und Modulbefestigungen. Für welchen Dachtyp planen Sie?';
+  if (q.match(/kabel|stecker|optimierer|zubehör|accessory/)) return 'Im PV-Zubehör führen wir Kabel von Lapp und BYD, Stecker von Stäubli und BYD, sowie Optimierer von Huawei und Tigo. Was benötigen Sie?';
+  // Pricing & quotes
+  if (q.match(/preis|kosten|price|cost|angebot|quote|wie viel|how much/)) return 'Als B2B-Großhändler bieten wir wettbewerbsfähige Mengenpreise. Für ein individuelles Angebot hinterlassen Sie gerne Ihre Kontaktdaten – unser Vertriebsteam meldet sich schnellstmöglich!';
+  // Ordering
+  if (q.match(/bestell|order|wie kann ich|how (do i|to) (order|buy)/)) return 'Bestellungen können Sie direkt über unseren Webshop auf epax-solar.de aufgeben oder uns unter +49 991 99899011 erreichen. Kann ich Ihnen bei der Produktauswahl helfen?';
+  // Contact & location
+  if (q.match(/kontakt|contact|adresse|address|standort|location|telefon|phone|email|wo sind/)) return 'Epax Solar GmbH ist in Deggendorf, Bayern ansässig. Sie erreichen uns unter +49 991 99899011 oder über das Kontaktformular auf epax-solar.de. Kann ich sonst noch helfen?';
+  // Shipping
+  if (q.match(/versand|lieferung|shipping|delivery|lager/)) return 'Wir liefern aus unseren Lagern in Deggendorf (Kühne+Nagel) und Passau. Die genauen Versandbedingungen finden Sie auf epax-solar.de. Haben Sie eine spezifische Frage zur Lieferung?';
+  return 'Danke für Ihre Frage! Ich helfe Ihnen gerne weiter. Geht es um Solarmodule, Wechselrichter, Speicher, E-Mobilität oder etwas anderes? Oder hinterlassen Sie Ihre Kontaktdaten und unser Team meldet sich direkt bei Ihnen.';
 }
 
 // ── PUBLIC: Save lead ─────────────────────────────────────────────────────────
