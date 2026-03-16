@@ -23,10 +23,10 @@
     }
     #epax-chat-window {
       position: fixed; bottom: 92px; right: 24px; z-index: 99999;
-      width: 360px; max-height: 580px;
+      width: 360px;
       background: #fff; border-radius: 16px;
       box-shadow: 0 8px 40px rgba(0,0,0,0.18);
-      display: flex; flex-direction: column; overflow: hidden;
+      display: flex; flex-direction: column; overflow: hidden; max-height: calc(100vh - 110px);
       transition: opacity 0.2s, transform 0.2s;
       font-family: system-ui, -apple-system, sans-serif;
     }
@@ -48,9 +48,9 @@
       color: rgba(255,255,255,0.7); font-size: 18px; line-height: 1; padding: 2px 4px;
     }
     .epax-messages {
-      flex: 1; overflow-y: auto; padding: 14px;
+      flex: 1; overflow-y: auto; padding: 14px; min-height: 120px;
       display: flex; flex-direction: column; gap: 10px;
-      background: #f8f8f6; min-height: 240px; max-height: 320px;
+      background: #f8f8f6; min-height: 120px; max-height: 220px;
     }
     .epax-msg { display: flex; gap: 7px; max-width: 88%; }
     .epax-msg.user { align-self: flex-end; flex-direction: row-reverse; }
@@ -105,7 +105,7 @@
     .epax-send:hover { opacity: .85; }
     .epax-send svg { fill: white; width: 14px; height: 14px; }
     .epax-lead-form {
-      padding: 12px 14px; background: #f0f4fa; border-top: 1px solid #dde5f0;
+      padding: 12px 14px; background: #f0f4fa; border-top: 1px solid #dde5f0; overflow-y: auto; max-height: 260px; flex-shrink: 0;
     }
     .epax-lead-form h5 {
       font-size: 11px; font-weight: 600; color: #666; margin: 0 0 8px;
