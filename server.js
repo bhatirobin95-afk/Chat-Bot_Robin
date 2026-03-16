@@ -53,7 +53,7 @@ app.post('/api/chat', async (req, res) => {
           'anthropic-version': '2023-06-01'
         },
         body: JSON.stringify({
-          model: 'claude-opus-4-6',
+          model: 'claude-sonnet-4-5',
           max_tokens: 400,
           system: `You are the friendly sales assistant for Epax Solar GmbH, a B2B PV wholesale supplier in Deggendorf, Bavaria, Germany.
 
@@ -82,6 +82,7 @@ Respond in the SAME language the user writes in (German or English).`,
       return res.json({ reply });
     } catch (e) {
       console.error('Claude API error:', e.message);
+      return res.json({ reply: 'API Fehler: ' + e.message });
     }
   }
   res.json({ reply: fallbackResponse(message) });
