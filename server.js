@@ -224,4 +224,4 @@ app.get('/api/admin/stats', requireAuth, (req, res) => {
 // Serve admin SPA
 app.get('/admin*', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
 
-app.listen(PORT, () => console.log(`\n✅ Epax Solar Bot running → http://localhost:${PORT}\n📊 Admin dashboard → http://localhost:${PORT}/admin\n`));
+app.listen(PORT, () => console.log(`\n✅ Epax Solar Bot v2 AI running → http://localhost:${PORT}\n📊 Admin dashboard → http://localhost:${PORT}/admin\n`));
